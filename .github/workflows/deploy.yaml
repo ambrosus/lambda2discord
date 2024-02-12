@@ -25,7 +25,7 @@ jobs:
 
       - name: Create Deployment Package
         run: |
-            zip -r deployment-package.zip .
+            zip -r lambda2discord.zip .
         working-directory: ${{ github.workspace }}      
 
       - name: Deploy to Lambda
