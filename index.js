@@ -6,6 +6,8 @@ async function handler(event) {
 
   try {
     await sendToDiscord(fileContent, fileName, message);
+    console.log('File sent successfully!');
+
   } catch (error) {
     console.error(error)
     return {
@@ -25,22 +27,16 @@ async function handler(event) {
 async function sendToDiscord(fileContent, fileName, message) {
   const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
 
-  try {
-    const fileBuffer = Buffer.from(fileContent, 'utf-8');
-    const fileBlob = new Blob([fileBuffer]);
+  const fileBuffer = Buffer.from(fileContent, 'utf-8');
+  const fileBlob = new Blob([fileBuffer]);
 
-    const formData = new FormData();
-    formData.append('file', fileBlob, fileName);
-    formData.append('content', message);
+  const formData = new FormData();
+  formData.append('file', fileBlob, fileName);
+  formData.append('content', message);
 
-    await axios.post(webhookUrl, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-
-    console.log('File sent successfully!');
-  } catch (error) {
-    console.error('Error sending file to Discord:', error);
-  }
+  await axios.post(webhookUrl, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
 }
 
 exports.handler = handler;
