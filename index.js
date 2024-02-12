@@ -1,11 +1,11 @@
-const axios = require('axios'); // You can install axios using npm or yarn
+const axios = require('axios');
 
 async function handler(event) {
   const webhookPayload = JSON.parse(event.body);
-  const { logsUrl } = webhookPayload;
+  const { fileContent, fileName, message } = webhookPayload;
 
   try {
-    await sendToDiscord(logsUrl);
+    await sendToDiscord(fileContent, fileName, message);
   } catch (error) {
     console.error(error)
     return {
@@ -22,10 +22,25 @@ async function handler(event) {
   };
 }
 
-
-async function sendToDiscord(logsUrl) {
+async function sendToDiscord(fileContent, fileName, message) {
   const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
-  await axios.post(webhookUrl, { content: logsUrl });
+
+  try {
+    const fileBuffer = Buffer.from(fileContent, 'utf-8');
+    const fileBlob = new Blob([fileBuffer]);
+
+    const formData = new FormData();
+    formData.append('file', fileBlob, fileName);
+    formData.append('content', message);
+
+    await axios.post(webhookUrl, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+
+    console.log('File sent successfully!');
+  } catch (error) {
+    console.error('Error sending file to Discord:', error);
+  }
 }
 
 exports.handler = handler;
